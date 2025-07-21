@@ -59,15 +59,15 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 
 - [ ] Explore UI/UX customizations for Copilot Chat in BAS (branding, feedback links, etc).
 - [ ] Implement telemetry to track extension adoption and usage (opt-in, privacy-compliant).
+- [ ] See here for gaps from original genie concept - https://github.wdf.sap.corp/devx-wing/bas-mcp-server/blob/main/discussions.md 
 
 ---
 
 ## Example Code References
 
-- **BAS Proxy for LLM** (`bas-llm-proxy.ts`)
-- **Credential/environment toggle** (see usage of `AICORE_SERVICE_KEY` vs. proxy)
-- **Continue AI** fork for forking best practices
-- **bas-mcp-server** https://github.wdf.sap.corp/devx-wing/bas-mcp-server/blob/main/discussions.md 
+- **bas-mcp-server** https://github.wdf.sap.corp/devx-wing/bas-mcp-server
+- **cline-joule** - https://github.com/eliavamar/Joule - Adjustments to Cline
+- **continue-light-ide** - https://github.com/idantrorg/continue/commits/light-ide/ 
 
 ---
 
