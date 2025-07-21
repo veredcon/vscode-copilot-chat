@@ -1,4 +1,4 @@
-# Research Plan: Integrating GitHub Copilot Chat with SAP AI Core in BAS
+# Integrating GitHub Copilot Chat with SAP AI Core in BAS
 
 ## Background & Motivation
 
