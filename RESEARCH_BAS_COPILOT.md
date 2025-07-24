@@ -20,12 +20,13 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 - [ ] Add integration/unit tests for core Copilot provider logic.
 - [ ] Refactor for robust logging, diagnostics, and error transparency (for troubleshooting).
 
-### 2. Secure Cloud/BAS Integration
+### 2. Secure Cloud and BAS Integration
 
+- [ ] Upgrade BAS to 1.103.0 and verify 0.30.0 version of copilot there - In Progress
 - [ ] Ensure credential usage (ai-core-creds.json direct file) is feature-toggled and only available in local/dev.
 - [ ] In BAS production, ensure **all** AI Core API calls are routed via the `/llm` BAS proxy endpoint - How to do it?
     - [ ] Build a library like `gai-core`, seperated from the genie concept that will execute http requests in order to get specific deployment deployment and request completion. This will involve in parsing messages per each provider (e.g. openai payload is different from anthropic). We can avoid doing that by potentially use the SAP AI Core SDK - but this is not currently possible.
-    - [ ] There is a concept of client proxy registry in **python** SDK see [here](https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/prompt-registry.html#initialize-the-client-to-interact-with-the-prompt-registry) and [here](https://github.wdf.sap.corp/AI/generative-ai-hub-sdk/blob/main/gen_ai_hub/proxy/core/proxy_clients.py) and example of registring [bas python client proxy](https://github.tools.sap/BTP-AI-Gen-EngSrv-India/generative-ai-hub-sdk-testcase/blob/basClient/bas_client.py) but this does not exist in javascript SDK.
+    - [ ] There is a concept of client proxy registry in **python** SDK see [here](https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/prompt-registry.html#initialize-the-client-to-interact-with-the-prompt-registry) and [here](https://github.wdf.sap.corp/AI/generative-ai-hub-sdk/blob/main/gen_ai_hub/proxy/core/proxy_clients.py) and example of registring [bas python client proxy](https://github.tools.sap/BTP-AI-Gen-EngSrv-India/generative-ai-hub-sdk-testcase/blob/basClient/bas_client.py) but this does not exist in javascript SDK. Opened [feature request](https://github.com/SAP/ai-sdk-js/issues/881) to AI Core  
 
 
 ### 3. Tool Calling / MCP Workflow
@@ -35,9 +36,10 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
     - Model emits tool call (function) in response.
     - Tool executes (e.g., MCP “weather”, CAP actions).
     - Model resumes conversation with results.
-- [ ] Validate for multiple sequential/parallel tool calls.
-- [ ] Test with real MCP integration for CAP project creation or other SAP-specific scenarios.
+- [X] Test with real MCP integration for CAP project creation
+- [ ] Test with other SAP-specific scenarios. (Fiori MCP etc.)
 - [ ] Ensure Copilot gracefully handles tool errors, user cancellations, or partial tool results.
+- [ ] Validate for multiple sequential/parallel tool calls.
 - [ ] Deliver Example MCP?
 
 ### 4. Forking & Upstream Sync Strategy
