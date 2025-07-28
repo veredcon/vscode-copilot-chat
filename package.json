@@ -3821,6 +3821,7 @@
 		"@microsoft/tiktokenizer": "^1.0.10",
 		"@roamhq/mac-ca": "^1.0.7",
 		"@sap-ai-sdk/orchestration": "^1.16.0",
+		"@sap/bas-sdk": "^3.11.6",
 		"@vscode/copilot-api": "^0.1.1",
 		"@vscode/extension-telemetry": "^1.0.0",
 		"@vscode/l10n": "^0.0.18",

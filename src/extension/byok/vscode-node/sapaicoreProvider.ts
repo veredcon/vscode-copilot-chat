@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AiDeploymentStatus } from '@sap-ai-sdk/ai-api';
-import { OrchestrationClient, OrchestrationModuleConfig, Prompt, ChatCompletionTool, MessageToolCall } from "@sap-ai-sdk/orchestration";
+import { AiDeployment, AiDeploymentStatus } from '@sap-ai-sdk/ai-api';
+import { OrchestrationClient, OrchestrationModuleConfig, Prompt, ChatCompletionTool, MessageToolCall, OrchestrationResponse } from "@sap-ai-sdk/orchestration";
 
 import { CancellationToken, ChatResponseFragment2, ChatResponseProviderMetadata, Disposable, LanguageModelChatMessage, LanguageModelChatMessageRole, LanguageModelChatProvider, LanguageModelChatRequestOptions, LanguageModelChatTool, LanguageModelTextPart, LanguageModelToolCallPart, Progress, lm } from "vscode";
 import { ILogService } from "../../../platform/log/common/logService";
@@ -41,10 +41,19 @@ export class SAPAICoreModelRegistry implements BYOKModelRegistry {
 
 	async getAllModels(): Promise<{ id: string; name: string }[]> {
 		try {
-			ensureAiCoreEnv();
-			const deployments = await getDeployments('default', 'RUNNING' as AiDeploymentStatus);
+			const basLLMProxy = ensureAiCoreEnv(this._logService);
+			let deployments: AiDeployment[] = [];
+			// basLLMProxy
+			if (basLLMProxy) {
+				// Use BAS LLM Proxy to fetch deployments
+				deployments = await basLLMProxy.getDeployments("default");
+			}
+			else {
+				deployments = (await getDeployments('default', 'RUNNING' as AiDeploymentStatus)).resources || [];
+			}
+
 			const names = new Set<string>();
-			for (const dep of deployments.resources ?? []) {
+			for (const dep of deployments) {
 				const name = dep.details?.resources?.backendDetails?.model?.name
 					|| dep.details?.resources?.backend_details?.model?.name;
 				if (name && !name.toLowerCase().includes("embedding")) { names.add(name); }
@@ -161,7 +170,7 @@ export class SAPAICoreProvider implements LanguageModelChatProvider {
 		progress: Progress<ChatResponseFragment2>,
 		token: CancellationToken
 	): Promise<void> {
-		ensureAiCoreEnv();
+		const basLLMProxy = ensureAiCoreEnv(this._logService);
 		const wrappedProgress = new RecordedProgress(progress);
 
 		const { messages: aiCoreMessages } = this.apiMessagesToAICore(messages);
@@ -175,24 +184,44 @@ export class SAPAICoreProvider implements LanguageModelChatProvider {
 			},
 			templating: { tools }
 		};
-		const client = new OrchestrationClient(config);
 
 		const prompt: Prompt = {
 			messages: [aiCoreMessages[aiCoreMessages.length - 1]],
 			messagesHistory: aiCoreMessages.slice(0, -1)
 		};
 
-		try {
-			const response = await client.chatCompletion(prompt);
-			const content = response.getContent() || "";
-			if (content) { wrappedProgress.report({ index: 0, part: new LanguageModelTextPart(content) }); }
+		let response;
+		// BAS LLM Proxy - limitations:
+		// 	-  supports only OpenAI API compatible models
+		//  -  no tool calling in agent mode
+		if (basLLMProxy) {
+			response = await basLLMProxy.requestCompletion(this.modelId, prompt);
+		} else { // process.env["AICORE_SERVICE_KEY"] exists
+			const client = new OrchestrationClient(config);
+			response = await client.chatCompletion(prompt);
+		}
 
-			const toolCalls = response.getToolCalls();
-			if (toolCalls?.length) {
-				for (const toolCall of this.parseToolsResponse(toolCalls)) {
-					wrappedProgress.report({ index: 0, part: toolCall });
+		try {
+			if (response instanceof OrchestrationResponse) {
+				const content = response.getContent() || "";
+				if (content) { wrappedProgress.report({ index: 0, part: new LanguageModelTextPart(content) }); }
+
+				const toolCalls = response.getToolCalls();
+				if (toolCalls?.length) {
+					for (const toolCall of this.parseToolsResponse(toolCalls)) {
+						wrappedProgress.report({ index: 0, part: toolCall });
+					}
 				}
 			}
+			else if (typeof response === "string") {
+				wrappedProgress.report({ index: 0, part: new LanguageModelTextPart(response) });
+			}
+			else {
+				const msg = "No response received from SAP AI Core.";
+				wrappedProgress.report({ index: 0, part: new LanguageModelTextPart(msg) });
+				this._logService.logger.error(msg);
+			}
+
 		} catch (e: any) {
 			const msg = "SAP AI Core error: " + (e?.message || String(e));
 			wrappedProgress.report({ index: 0, part: new LanguageModelTextPart(msg) });

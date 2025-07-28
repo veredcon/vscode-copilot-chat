@@ -3,9 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { type AiDeploymentList, type AiDeploymentStatus, DeploymentApi, ScenarioApi, type AiModelList } from '@sap-ai-sdk/ai-api';
+import { ILogService } from '../../../platform/log/common/logService';
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { devspace } from "@sap/bas-sdk";
+import { BASLLMProxy } from './basLLMProxy';
+
 const AI_CORE_CREDS_FILENAME = "ai-core-creds.json";
 
 /**
@@ -81,8 +85,24 @@ function loadAiCoreCredentials(): string {
 	return JSON.stringify(parsed);
 }
 
-export function ensureAiCoreEnv() {
-	if (!process.env["AICORE_SERVICE_KEY"]) {
-		process.env["AICORE_SERVICE_KEY"] = loadAiCoreCredentials();
+export function ensureAiCoreEnv(logService: ILogService): void | BASLLMProxy {
+	let creds: string | undefined;
+
+	try {
+		creds = loadAiCoreCredentials();
+	} catch (err) {
+		logService.logger.info(`Failed to load AI Core credentials: ${err}. Trying to get from BAS Proxy.`);
+	}
+
+	if (creds) {
+		process.env["AICORE_SERVICE_KEY"] = creds;
+		logService.logger.info(`AI Core service credentials loaded successfully from file ~/${AI_CORE_CREDS_FILENAME}.`);
+	} else if (devspace.isBuildCode()) {
+		logService.logger.info("AI Core credentials missing. Falling back to BAS Proxy LLM AI Core setup.");
+		return new BASLLMProxy(logService);
+	} else {
+		logService.logger.info(
+			`AI Core setup failed. Please check the credentials file ~/${AI_CORE_CREDS_FILENAME} or ensure working in BAS BuildCode.`,
+		);
 	}
 }
