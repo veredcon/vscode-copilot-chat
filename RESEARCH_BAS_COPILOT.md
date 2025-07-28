@@ -1,4 +1,4 @@
-# Research Plan: Integrating GitHub Copilot Chat with SAP AI Core in BAS
+# Integrating GitHub Copilot Chat with SAP AI Core in BAS
 
 ## Background & Motivation
 
@@ -10,81 +10,60 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 
 ## Core Research Tasks & Future Work
 
-### 1. Provider and Extension Architecture
+### 1. SAP AI Core Provider and Extension Architecture
 
-- [ ] Understand Copilot Chat OSS architecture and LLM provider plug-in points.
-- [ ] Implement basic SAP AI Core provider and integrate into Copilot.
+- [X] Understand Copilot Chat OSS architecture and LLM provider plug-in points.
+- [X] Implement basic SAP AI Core provider and integrate into Copilot (currently file based credentials - ai-core-creds.json)
 - [ ] Refactor provider to support streaming responses for real-time AI chat (currently responses are not streamed).
-- [ ] Properly fork the Copilot Chat repo to allow for long-term maintainability and easier upstream syncs (similar to how “Continue AI” was handled).
-- [ ] Review and improve all error handling, token counting, and prompt formatting to be robust against edge cases.
+- [ ] Support/Test more models in Agent mode (e.g. anthropic is not fully supported in agent mode. Need to verify what is supported by orchestration API).
+- [ ] Token counting and metering - `orchestration` service provides `getTokenUsage()` which provides token usage details, including `total_tokens`, `prompt_tokens`, and `completion_tokens`.
+- [ ] Add integration/unit tests for core Copilot provider logic.
+- [ ] Refactor for robust logging, diagnostics, and error transparency (for troubleshooting).
 
-### 2. Secure Cloud/BAS Integration
+### 2. Secure Cloud and BAS Integration
 
-- [ ] Replace file-based credential loading (ai-core-creds.json) with runtime credential acquisition.
-- [ ] Ensure credential usage (direct file) is feature-toggled and only available in local/dev.
-- [ ] In BAS production, ensure **all** AI Core API calls are routed via the `/llm` BAS proxy endpoint.
-    - [ ] Example: see `bas-llm-proxy.ts` and `getLLMServiceUrl()`.
-- [ ] Reuse code/approach from the MCP Server extension, especially for proxy logic.
-- [ ] Review for any hardcoded credentials or endpoints, and document secret-handling best practices.
+- [ ] Upgrade BAS to 1.103.0 and verify 0.30.0 version of copilot there - In Progress
+- [ ] Ensure credential usage (ai-core-creds.json direct file) is feature-toggled and only available in local/dev.
+- [ ] In BAS production, ensure **all** AI Core API calls are routed via the `/llm` BAS proxy endpoint - How to do it?
+    - [ ] Build a library like `gai-core`, seperated from the genie concept that will execute http requests in order to get specific deployment deployment and request completion. This will involve in parsing messages per each provider (e.g. openai payload is different from anthropic). We can avoid doing that by potentially use the SAP AI Core SDK - but this is not currently possible.
+    - [ ] There is a concept of client proxy registry in **python** SDK see [here](https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/prompt-registry.html#initialize-the-client-to-interact-with-the-prompt-registry) and [here](https://github.wdf.sap.corp/AI/generative-ai-hub-sdk/blob/main/gen_ai_hub/proxy/core/proxy_clients.py) and example of registring [bas python client proxy](https://github.tools.sap/BTP-AI-Gen-EngSrv-India/generative-ai-hub-sdk-testcase/blob/basClient/bas_client.py) but this does not exist in javascript SDK. Opened [feature request](https://github.com/SAP/ai-sdk-js/issues/881) to AI Core  
 
-### 3. Streaming & Real-Time User Experience
 
-- [ ] Implement streaming support in SAP AI Core provider (send tokens/chunks as they arrive).
-- [ ] Test UI/UX for responsiveness with long model outputs and user prompts.
-- [ ] Validate compatibility with Copilot’s chat UI (progress updates, error boundaries, etc).
+### 3. Tool Calling / MCP Workflow
 
-### 4. Tool Calling / MCP Workflow
-
-- [ ] Document and test end-to-end tool call flow:
-    - [ ] User asks a question.
-    - [ ] Model emits tool call (function) in response.
-    - [ ] Tool executes (e.g., MCP “weather”, CAP actions).
-    - [ ] Model resumes conversation with results.
-- [ ] Validate for multiple sequential/parallel tool calls.
-- [ ] Test with real MCP integration for CAP project creation or other SAP-specific scenarios.
+- [X] Test end-to-end tool call flow:
+    - User asks a question.
+    - Model emits tool call (function) in response.
+    - Tool executes (e.g., MCP “weather”, CAP actions).
+    - Model resumes conversation with results.
+- [X] Test with real MCP integration for CAP project creation
+- [ ] Test with other SAP-specific scenarios. (Fiori MCP etc.)
 - [ ] Ensure Copilot gracefully handles tool errors, user cancellations, or partial tool results.
+- [ ] Validate for multiple sequential/parallel tool calls.
+- [ ] Deliver Example MCP?
 
-### 5. Forking & Upstream Sync Strategy
+### 4. Forking & Upstream Sync Strategy
 
-- [ ] Create a proper GitHub fork of Copilot Chat OSS.
+- [ ] Create a proper GitHub fork of Copilot Chat OSS to allow for long-term maintainability and easier upstream syncs (similar to how “Continue AI” was handled).
 - [ ] Add documentation (`FORK_NOTES.md`) on how to:
     - [ ] Rebase and merge from upstream.
     - [ ] Track local changes (especially SAP AI Core provider).
     - [ ] Apply/undo BAS-specific patches or toggles.
-- [ ] Consider CI for testing fork upgrades before merging to BAS mainline.
 
-### 6. Other Technical Tasks
-
-- [ ] Ensure model metadata, token limits, and capabilities are properly detected and exposed in the provider.
-- [ ] Refactor for robust logging, diagnostics, and error transparency (for troubleshooting).
-- [ ] Document usage, configuration, and limitations in a `README_BAS_COPILOT.md` (for BAS developers).
-
----
-
-## Bonus: Example Code References
-
-- [ ] **BAS Proxy for LLM** (`bas-llm-proxy.ts`)
-- [ ] **Credential/environment toggle** (see usage of `AICORE_SERVICE_KEY` vs. proxy)
-- [ ] **Continue AI** fork for forking best practices
-
----
-
-## Immediate To-Do List
-
-- [ ] Replace local file-based credentials with feature-toggled runtime credential loading.
-- [ ] Move all model requests through the `/llm` BAS proxy when in production/BAS.
-- [ ] Refactor provider to support streaming completions.
-- [ ] Create fork, document patching/upstream sync process.
-- [ ] Test MCP tool-calling with CAP/Fiori integration.
-- [ ] Document error cases and edge conditions.
-- [ ] Add integration/unit tests for core Copilot provider logic.
-
----
-
-## Optional/Advanced
+## Advanced
 
 - [ ] Explore UI/UX customizations for Copilot Chat in BAS (branding, feedback links, etc).
 - [ ] Implement telemetry to track extension adoption and usage (opt-in, privacy-compliant).
+- [ ] See here for gaps from original genie concept - https://github.wdf.sap.corp/devx-wing/bas-mcp-server/blob/main/discussions.md 
 
 ---
+
+## Example Code References
+
+- **bas-mcp-server** https://github.wdf.sap.corp/devx-wing/bas-mcp-server
+- **cline-joule** - https://github.com/eliavamar/Joule - Adjustments to Cline
+- **continue-light-ide** - https://github.com/idantrorg/continue/commits/light-ide/ 
+
+---
+
 
