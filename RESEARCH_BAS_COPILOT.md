@@ -14,19 +14,23 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 
 - [X] Understand Copilot Chat OSS architecture and LLM provider plug-in points.
 - [X] Implement basic SAP AI Core provider and integrate into Copilot (currently file based credentials - ai-core-creds.json)
+- [ ] Extract the implementation from the patch of copilot to a seperate extension like in the sample provided here so the LLM provider will be contribted from an extension- https://github.com/microsoft/vscode-copilot-chat/pull/315 (only works from 1.103.0 of VSCode) - This will be relevant for both BAS and Local VSCode.
+- [ ] Ability to set default: e.g. Agent + specific model - needs to auto register specific model. How to determine which "default" model will be relevant for each scenario?
+- [ ] Ability to expose relevant AI Core models - filter according to some "white list"
 - [ ] Refactor provider to support streaming responses for real-time AI chat (currently responses are not streamed).
 - [ ] Support/Test more models in Agent mode (e.g. anthropic is not fully supported in agent mode. Need to verify what is supported by orchestration API).
-- [ ] Token counting and metering - `orchestration` service provides `getTokenUsage()` which provides token usage details, including `total_tokens`, `prompt_tokens`, and `completion_tokens`.
+- [ ] Token counting and metering - `orchestration` service provides `getTokenUsage()` which provides token usage details, including `total_tokens`, `prompt_tokens`, and `completion_tokens`
+    - Understand how our BAS proxy for metering works and understand how to maintain it
+    - Investigate ability to categorize different API calls (e.g., analysis, file generation, file read) and assign weights to them in order to support usage profiling and pricing decisions.
 - [ ] Add integration/unit tests for core Copilot provider logic.
 - [ ] Refactor for robust logging, diagnostics, and error transparency (for troubleshooting).
 
 ### 2. Secure Cloud and BAS Integration
 
-- [ ] Upgrade BAS to 1.103.0 and verify 0.30.0 version of copilot there - In Progress
+- [ ] Upgrade BAS to 1.103.0 and verify 0.30.0 version of copilot there - In Progress (or 1.102.2 and copilot 0.29.1)
 - [ ] Ensure credential usage (ai-core-creds.json direct file) is feature-toggled and only available in local/dev.
 - [ ] In BAS production, ensure **all** AI Core API calls are routed via the `/llm` BAS proxy endpoint - How to do it?
-    - [ ] Build a library like `gai-core`, seperated from the genie concept that will execute http requests in order to get specific deployment deployment and request completion. This will involve in parsing messages per each provider (e.g. openai payload is different from anthropic). We can avoid doing that by potentially use the SAP AI Core SDK - but this is not currently possible.
-    - [ ] There is a concept of client proxy registry in **python** SDK see [here](https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/prompt-registry.html#initialize-the-client-to-interact-with-the-prompt-registry) and [here](https://github.wdf.sap.corp/AI/generative-ai-hub-sdk/blob/main/gen_ai_hub/proxy/core/proxy_clients.py) and example of registring [bas python client proxy](https://github.tools.sap/BTP-AI-Gen-EngSrv-India/generative-ai-hub-sdk-testcase/blob/basClient/bas_client.py) but this does not exist in javascript SDK. Opened [feature request](https://github.com/SAP/ai-sdk-js/issues/881) to AI Core  
+    - [ ] Use directly ai-core-sdk javascript and use custom destination that is registered programatically - look here for details: https://github.com/SAP/ai-sdk-js/issues/881  
 
 
 ### 3. Tool Calling / MCP Workflow
