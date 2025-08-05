@@ -26,6 +26,7 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
     - Investigate ability to categorize different API calls (e.g., analysis, file generation, file read) and assign weights to them in order to support usage profiling and pricing decisions.
 - [ ] Add integration/unit tests for core Copilot provider logic.
 - [ ] Refactor for robust logging, diagnostics, and error transparency (for troubleshooting).
+- [ ] Consider the case where BAS in non Build Code plan so no AI - How it should look like.
 
 ### 2. Secure Cloud and BAS Integration
 
