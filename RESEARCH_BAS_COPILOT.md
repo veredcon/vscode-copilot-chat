@@ -10,17 +10,19 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 
 ## Core Research Tasks & Future Work
 
+### 0. Enable activation of GitHub Copilot in BAS (1.102.3 + copilot 0.29.1) - without even our changes.
+
 ### 1. SAP AI Core Provider and Extension Architecture
 
 - [X] Understand Copilot Chat OSS architecture and LLM provider plug-in points.
 - [X] Implement basic SAP AI Core provider and integrate into Copilot (currently file based credentials - ai-core-creds.json)
-- [ ] Extract the implementation from the patch of copilot to a seperate extension like in the sample provided here so the LLM provider will be contribted from an extension- https://github.com/microsoft/vscode-copilot-chat/pull/315 (only works from 1.103.0 of VSCode) - This will be relevant for both BAS and Local VSCode.
-- [ ] Ability to set default: e.g. Agent + specific model - needs to auto register specific model. How to determine which "default" model will be relevant for each scenario?
-- [ ] Ability to expose relevant AI Core models - filter according to some "white list"
-- [ ] Refactor provider to support streaming responses for real-time AI chat (currently responses are not streamed).
-- [ ] Support/Test more models in Agent mode (e.g. anthropic is not fully supported in agent mode. Need to verify what is supported by orchestration API).
+- [ ] Implement the provider to use AI Core SDK API calls are routed via the `/llm` BAS proxy endpoint - Use directly ai-core-sdk javascript and use custom destination that is registered programatically - look here for details: https://github.com/SAP/ai-sdk-js/issues/881 
+- [ ] Extract the implementation from the patch of copilot to a seperate extension like in the sample provided here so the LLM provider will be contribted from an extension- https://github.com/microsoft/vscode-copilot-chat/pull/315 (only works from 1.103.0 of VSCode) - This will be relevant for both BAS and Local VSCode. - Check if the same provider can work for both BAS (with /llm) and Local VSCode (when supplying key) - or we must to split to 2 extensions. (based on bas-sdk). Think if needed to enhance bas-sdk for this scenario. We don't need to implement the scenario for local at this point - only to check if we can differentiate between the two in runtime.
+- [ ] Ability to set default: e.g. Agent + specific model from SAP AI Core Provider (remove other providers, filter models from the instance according to some "white list") - needs to auto register specific models (with one selected by default). How to determine which "default" model will be relevant for each scenario? - Is this configuration of default model can be decided at runtime (e.g. by reading some configuration) or it is static content e.g. in package.json. 
+- [ ] Refactor provider to support streaming responses for real-time AI chat (currently responses are not streamed) - use streaming API from AI Core SDK javascript.
+- [ ] Support/Test more models in Agent mode (e.g. anthropic is not fully supported in agent mode. Need to verify what is supported by orchestration API) - initiate meeting/issue/discussion with AI Core.
 - [ ] Token counting and metering - `orchestration` service provides `getTokenUsage()` which provides token usage details, including `total_tokens`, `prompt_tokens`, and `completion_tokens`
-    - Understand how our BAS proxy for metering works and understand how to maintain it
+    - Understand how our BAS proxy for metering works and understand how to maintain it - we will still add custom headers to the request of specific model + genie name="Vibe Coding".
     - Investigate ability to categorize different API calls (e.g., analysis, file generation, file read) and assign weights to them in order to support usage profiling and pricing decisions.
 - [ ] Add integration/unit tests for core Copilot provider logic.
 - [ ] Refactor for robust logging, diagnostics, and error transparency (for troubleshooting).
@@ -28,11 +30,8 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 ### 2. Secure Cloud and BAS Integration
 
 - [ ] Upgrade BAS to 1.103.0 and verify 0.30.0 version of copilot there - In Progress (or 1.102.2 and copilot 0.29.1)
-- [ ] Ensure credential usage (ai-core-creds.json direct file) is feature-toggled and only available in local/dev.
-- [ ] In BAS production, ensure **all** AI Core API calls are routed via the `/llm` BAS proxy endpoint - How to do it?
-    - [ ] Use directly ai-core-sdk javascript and use custom destination that is registered programatically - look here for details: https://github.com/SAP/ai-sdk-js/issues/881  
-
-
+- [ ] Remove the current credential usage (ai-core-creds.json direct file).
+ 
 ### 3. Tool Calling / MCP Workflow
 
 - [X] Test end-to-end tool call flow:
@@ -41,20 +40,24 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
     - Tool executes (e.g., MCP “weather”, CAP actions).
     - Model resumes conversation with results.
 - [X] Test with real MCP integration for CAP project creation
+- [ ] Register default MCPs in file ~/Library/Application Support/Code/User/mcp.json (need to define how to get MCP list per dev space type) - As part of simple extension framework contribute different MCP.
+- [ ] Verify that BAS env vars are propegated to the registered MCP tools and if not, modify the code to propegate them (as we don't want to configure them in the mcp.json configuration file).
 - [ ] Test with other SAP-specific scenarios. (Fiori MCP etc.)
 - [ ] Ensure Copilot gracefully handles tool errors, user cancellations, or partial tool results.
-- [ ] Validate for multiple sequential/parallel tool calls.
-- [ ] Deliver Example MCP?
+- [ ] Validate for multiple sequential/parallel tool calls. 
 
 ### 4. Forking & Upstream Sync Strategy & Delivery
 
-- [ ] Create a proper **GitHub fork of Copilot Chat OSS** to allow for long-term maintainability and easier upstream syncs (similar to how “Continue AI” was handled).
+- [ ] Create a proper **GitHub fork of Copilot Chat OSS** to allow for long-term maintainability and easier upstream syncs (similar to how “Continue AI”/"OpenVscode" was handled).
 - [ ] Add documentation (`FORK_NOTES.md`) on how to:
     - [ ] Rebase and merge from upstream.
-    - [ ] Track local changes (especially SAP AI Core provider).
+    - [ ] Track local changes/"patches" (especially SAP AI Core provider).
     - [ ] Apply/undo BAS-specific patches or toggles.
-- [ ] Deliver The forked Copilot
-- [ ] Deliver the VSCode Chat model provider
+- [ ] Add cenetral pipeline to the forked GitHubCopilot Code OSS.
+- [ ] Deliver this extension as part of joule-core (excluded in private cloud) - requires PM approval. 
+- [ ] VSCode Chat model provider
+    - Release the new VSCode extension in a new repository, centeral pipeline
+    - Deliver it as part of joule-core  
 
 ## Advanced
 
