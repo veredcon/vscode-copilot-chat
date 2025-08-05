@@ -48,7 +48,7 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
 
 ### 4. Forking & Upstream Sync Strategy & Delivery
 
-- [ ] Create a proper **GitHub fork of Copilot Chat OSS** to allow for long-term maintainability and easier upstream syncs (similar to how “Continue AI”/"OpenVscode" was handled).
+- [ ] Create a proper **GitHub fork of Copilot Chat OSS** to allow for long-term maintainability and easier upstream syncs (similar to how “Continue AI”/"OpenVscode" was handled). **NOTE: Check if it is not already delivered as part of Code OSS.**
 - [ ] Add documentation (`FORK_NOTES.md`) on how to:
     - [ ] Rebase and merge from upstream.
     - [ ] Track local changes/"patches" (especially SAP AI Core provider).
