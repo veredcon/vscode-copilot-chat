@@ -40,7 +40,7 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
     - Tool executes (e.g., MCP “weather”, CAP actions).
     - Model resumes conversation with results.
 - [X] Test with real MCP integration for CAP project creation
-- [ ] Register default MCPs in file ~/Library/Application Support/Code/User/mcp.json (need to define how to get MCP list per dev space type) - As part of simple extension framework contribute different MCP.
+- [ ] Register default MCPs in file ~/Library/Application Support/Code/User/mcp.json (need to define how to get MCP list per dev space type) - **As part of simple extension framework contribute different MCP.**
 - [ ] Verify that BAS env vars are propegated to the registered MCP tools and if not, modify the code to propegate them (as we don't want to configure them in the mcp.json configuration file).
 - [ ] Test with other SAP-specific scenarios. (Fiori MCP etc.)
 - [ ] Ensure Copilot gracefully handles tool errors, user cancellations, or partial tool results.
