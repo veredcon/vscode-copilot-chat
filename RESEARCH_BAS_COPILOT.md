@@ -54,9 +54,9 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
     - [ ] Track local changes/"patches" (especially SAP AI Core provider).
     - [ ] Apply/undo BAS-specific patches or toggles.
 - [ ] Add cenetral pipeline to the forked GitHubCopilot Code OSS.
-- [ ] Deliver this extension as part of joule-core (excluded in private cloud) - requires PM approval. 
-- [ ] VSCode Chat model provider
-    - Release the new VSCode extension in a new repository, centeral pipeline
+- [ ] Deliver the **GitHub Copilot OSS** extension as part of joule-core (excluded in private cloud) - requires PM approval. 
+- [ ] **VSCode Chat model provider**
+    - Release the new VSCode extension in a gen-ai-tools repository
     - Deliver it as part of joule-core  
 
 ## Advanced
