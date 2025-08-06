@@ -60,6 +60,10 @@ This will allow richer AI capabilities, tighter SAP integration, and enterprise-
     - Release the new VSCode extension in a gen-ai-tools repository
     - Deliver it as part of joule-core  
 
+### 5. Storage
+
+- [ ] Make sure using the copilot dosen't increase much more the disk space. Check issues related to storage. Verify folders that are being used by the copilot chat.
+
 ## Advanced
 
 - [ ] Explore UI/UX customizations for Copilot Chat in BAS (branding, feedback links, etc).
